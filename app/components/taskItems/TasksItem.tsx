@@ -2,7 +2,7 @@
 import { useGlobalContext } from "@/app/themes/globarContextProvider";
 import formatDate from "@/app/utils/formatedDate";
 import { edit, trash } from "@/app/utils/icons";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
 interface Props {
@@ -21,7 +21,17 @@ export default function TasksItem({
   isImportant,
   id
 }: Props) {
-    const {theme,deleteTask,updateTask}=useGlobalContext()
+    const {theme,deleteTask,updateTask,editTask}=useGlobalContext()
+    const handleEdit = () => {
+      editTask({
+        id,
+        title,
+        description,
+        date,
+        isCompleted,
+        isImportant,
+      });
+    };
   return (
     <TaskItemStyled theme={{theme}}>
       <h1>{title}</h1>
@@ -45,7 +55,7 @@ export default function TasksItem({
             updateTask(task);
           }}>Incomplete</button>
         )}
-      <button className="edit">{edit}</button>
+      <button className="edit" onClick={handleEdit}>{edit}</button>
       <button className="delete" onClick={()=>{
          if (id) {
           deleteTask(id);

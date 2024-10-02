@@ -1,6 +1,6 @@
 "use client";
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import styled from "styled-components";
 import Button from "../button/Button";
@@ -8,13 +8,22 @@ import { add } from "@/app/utils/icons";
 import { useGlobalContext } from "@/app/themes/globarContextProvider";
 
 function CreateContent() {
-  const {theme,closeModel,allTasks}=useGlobalContext()
+  const {theme,closeModel,allTasks,updateTaks,setUpdateTaks}=useGlobalContext()
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
   const [completed, setCompleted] = useState(false);
   const [important, setImportant] = useState(false);
 
+  useEffect(() => {
+    if (updateTaks) {
+      setTitle(updateTaks.title);
+      setDescription(updateTaks.description);
+      setDate(updateTaks.date);
+      setCompleted(updateTaks.isCompleted);
+      setImportant(updateTaks.isImportant);
+    }
+  }, [updateTaks]);
 
   const handleChange = (name: string) => (e: any) => {
     switch (name) {
@@ -38,29 +47,39 @@ function CreateContent() {
     }
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
 
     const task = {
       title,
       description,
       date,
-      completed,
+       completed,
       important,
     };
 
     try {
-      const res = await axios.post("/api/tasks", task);
+      let res;
+      if (updateTaks) {
+        res = await axios.put(`/api/tasks/${updateTaks.id}`, task);
+        toast.success("Task updated successfully.");
+      } else {
+        res = await axios.post("/api/tasks", task);
+        toast.success("Task created successfully.");
+      }
 
       if (res.data.error) {
         toast.error(res.data.error);
+      } else {
+        closeModel();
+        allTasks();
+        setUpdateTaks(null);
+        setTitle("");
+        setDescription("");
+        setDate("");
+        setCompleted(false);
+        setImportant(false);
       }
-
-      if (!res.data.error) {
-        toast.success("Task created successfully.");
-      }
-      closeModel()
-      allTasks()
     } catch (error) {
       toast.error("Something went wrong.");
       console.log(error);
@@ -69,7 +88,7 @@ function CreateContent() {
 
   return (
     <CreateContentStyled onSubmit={handleSubmit} theme={{theme}}>
-      <h1>Create a Task</h1>
+      <h1>{updateTaks ? 'edit Task':'add Task'}</h1>
       <div className="input-control">
         <label htmlFor="title">Title</label>
         <input
@@ -126,7 +145,7 @@ function CreateContent() {
       <div className="submit-btn flex justify-end">
         <Button
           type="submit"
-          name="Create Task"
+          name={updateTaks? 'update Task':"Create Task"}
           icon={add}
           padding={"0.8rem 2rem"}
           borderRad={"0.8rem"}

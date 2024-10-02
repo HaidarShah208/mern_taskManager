@@ -16,14 +16,17 @@ export const GlobalProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [model,setModel]=useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [updateTaks,setUpdateTaks]=useState(null)
   const theme = themes[selectedTheme];
 
  const openModel=()=>{
    setModel(true);
+   setUpdateTaks(null);
  }
 
  const closeModel=()=>{
    setModel(false);
+   setUpdateTaks(null);
  }
 
  const collapseMenu = () => {
@@ -47,6 +50,7 @@ export const GlobalProvider = ({ children }) => {
       toast.error("Error occure in fetching tasks");
     }
   };
+
 
 
   const deleteTask = async (id:string) => {
@@ -74,6 +78,12 @@ export const GlobalProvider = ({ children }) => {
     }
   };
 
+
+  const editTask= (task:any)=>{
+    setModel(true)
+    setUpdateTaks(task)
+  }
+
   const completedTasks= tasks.filter(task => task.isCompleted === true);
   const importantTasks= tasks.filter(task => task.isImportant === true);
   const incompleteTasks= tasks.filter(task => task.isCompleted === false);
@@ -82,7 +92,7 @@ export const GlobalProvider = ({ children }) => {
   }, [user]);
 
   return (
-    <GlobalContext.Provider value={{ theme,tasks,deleteTask,loading ,completedTasks,importantTasks,incompleteTasks,updateTask,openModel,closeModel,model,allTasks,collapseMenu,collapsed}}>
+    <GlobalContext.Provider value={{ theme,tasks,deleteTask,loading ,completedTasks,importantTasks,incompleteTasks,updateTask,openModel,closeModel,model,allTasks,collapseMenu,collapsed,editTask,updateTaks,setUpdateTaks}}>
       <GlobalUpdateContext.Provider value={{}}>
         {children}
       </GlobalUpdateContext.Provider>

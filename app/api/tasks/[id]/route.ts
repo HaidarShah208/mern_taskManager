@@ -26,3 +26,38 @@ export async function DELETE(
       return NextResponse.json({ error: "Error deleting task", status: 500 });
     }
   }
+
+
+
+
+  export async function PUT(req: Request, { params }: { params: { id: string } }) {
+    try {
+      const { userId } = auth();
+      const { title, description, date, isCompleted, isImportant } = await req.json();
+  
+      if (!userId) {
+        return NextResponse.json({ error: "Unauthorized", status: 401 });
+      }
+  
+      if (!title || !description || !date) {
+        return NextResponse.json({ error: "All fields are required", status: 400 });
+      }
+  
+      const task = await prisma.task.update({
+        where: { id: params.id },
+        data: {
+          title,
+          description,
+          date,
+          isCompleted,
+          isImportant,
+          userId,
+        },
+      });
+  
+      return NextResponse.json(task);
+    } catch (error) {
+      console.log("ERROR UPDATING TASK: ", error);
+      return NextResponse.json({ error: "Error updating task", status: 500 });
+    }
+  }
